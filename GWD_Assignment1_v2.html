@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Game World Design Analysis — Assignment 1</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: #080b14;
+      color: #d4d8e8;
+      font-family: 'Inter', sans-serif;
+      font-weight: 400;
+      font-size: 15.5px;
+      line-height: 1.8;
+    }
+
+    /* ── COVER ── */
+    .cover {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 60px 20px;
+      background: radial-gradient(ellipse at 50% 40%, #0d1a3a 0%, #080b14 70%);
+      position: relative;
+      overflow: hidden;
+    }
+    .cover::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,0.4) 0%, transparent 100%),
+        radial-gradient(1px 1px at 80% 15%, rgba(255,255,255,0.3) 0%, transparent 100%),
+        radial-gradient(1px 1px at 55% 70%, rgba(255,255,255,0.3) 0%, transparent 100%),
+        radial-gradient(1px 1px at 10% 60%, rgba(255,255,255,0.2) 0%, transparent 100%),
+        radial-gradient(1px 1px at 90% 80%, rgba(255,255,255,0.2) 0%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 35% 50%, rgba(255,255,255,0.5) 0%, transparent 100%),
+        radial-gradient(1px 1px at 65% 25%, rgba(255,255,255,0.3) 0%, transparent 100%),
+        radial-gradient(1px 1px at 45% 85%, rgba(255,255,255,0.2) 0%, transparent 100%);
+    }
+    .cover-label {
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: #7a8aaa;
+      margin-bottom: 24px;
+      position: relative;
+    }
+    .cover h1 {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(28px, 5vw, 54px);
+      font-weight: 700;
+      color: #ffffff;
+      line-height: 1.2;
+      max-width: 800px;
+      text-shadow: 0 0 40px rgba(100,140,255,0.4);
+      margin-bottom: 16px;
+      position: relative;
+    }
+    .cover-sub {
+      font-size: 14px;
+      color: #5a6a88;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 50px;
+      position: relative;
+    }
+    .films-row {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 10px;
+      position: relative;
+    }
+    .film-badge {
+      padding: 10px 22px;
+      border-radius: 30px;
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 1px;
+      border: 1px solid;
+    }
+    .badge-titan    { border-color: #1a6fff; color: #4d9fff; background: rgba(26,111,255,0.08); }
+    .badge-treasure { border-color: #c8860a; color: #f0a830; background: rgba(200,134,10,0.08); }
+    .badge-atlantis { border-color: #009e7f; color: #00d4aa; background: rgba(0,158,127,0.08); }
+
+    /* ── WRAPPER ── */
+    .wrapper {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 60px 24px 100px;
+    }
+
+    /* ── FILM SECTION ── */
+    .film-section { margin-bottom: 90px; }
+
+    .film-header {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      margin-bottom: 28px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+    .film-number {
+      font-family: 'Cinzel', serif;
+      font-size: 48px;
+      font-weight: 700;
+      opacity: 0.12;
+      line-height: 1;
+      user-select: none;
+      flex-shrink: 0;
+    }
+    .film-title-block { flex: 1; }
+    .film-title-block h2 {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(22px, 3vw, 32px);
+      font-weight: 600;
+      color: #ffffff;
+      line-height: 1.1;
+    }
+    .film-title-block .film-year {
+      font-size: 12px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-top: 5px;
+    }
+    .poster-img {
+      height: 130px;
+      width: auto;
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.1);
+      object-fit: cover;
+      flex-shrink: 0;
+      display: block;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    }
+
+    /* Per-film accent colours */
+    .titan  .film-number,
+    .titan  .film-title-block h2 { color: #4d9fff; }
+    .titan  .film-year            { color: #4d9fff; }
+    .titan  h3::before            { background: #1a6fff; }
+    .titan  .tag                  { background: rgba(26,111,255,0.15); border-color: rgba(26,111,255,0.3); color: #4d9fff; }
+    .titan  .callout              { border-color: #1a6fff; }
+
+    .treasure  .film-number,
+    .treasure  .film-title-block h2 { color: #f0a830; }
+    .treasure  .film-year            { color: #f0a830; }
+    .treasure  h3::before            { background: #c8860a; }
+    .treasure  .tag                  { background: rgba(200,134,10,0.15); border-color: rgba(200,134,10,0.3); color: #f0a830; }
+    .treasure  .callout              { border-color: #c8860a; }
+
+    .atlantis  .film-number,
+    .atlantis  .film-title-block h2 { color: #00d4aa; }
+    .atlantis  .film-year            { color: #00d4aa; }
+    .atlantis  h3::before            { background: #009e7f; }
+    .atlantis  .tag                  { background: rgba(0,158,127,0.15); border-color: rgba(0,158,127,0.3); color: #00d4aa; }
+    .atlantis  .callout              { border-color: #009e7f; }
+
+    /* ── HERO IMAGE ── */
+    .hero-img {
+      width: 100%;
+      border-radius: 10px;
+      margin-bottom: 36px;
+      display: block;
+      object-fit: cover;
+      max-height: 420px;
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+
+    /* ── SUB-SECTIONS ── */
+    h3 {
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2.5px;
+      color: #c8d4ee;
+      margin: 36px 0 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    h3::before {
+      content: '';
+      display: inline-block;
+      width: 18px;
+      height: 2px;
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+
+    p { margin-bottom: 12px; color: #b8c2d8; }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 16px 0;
+    }
+    ul li {
+      padding: 5px 0 5px 20px;
+      position: relative;
+      color: #b8c2d8;
+    }
+    ul li::before {
+      content: '—';
+      position: absolute;
+      left: 0;
+      color: #3a4a68;
+      font-size: 13px;
+    }
+
+    /* ── INLINE IMAGES ── */
+    .img-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin: 20px 0;
+    }
+    .img-row.triple { grid-template-columns: 1fr 1fr 1fr; }
+    .img-wrap {
+      position: relative;
+      overflow: hidden;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+    .img-wrap img {
+      width: 100%;
+      display: block;
+      object-fit: cover;
+      max-height: 200px;
+      transition: transform 0.3s ease;
+    }
+    .img-wrap:hover img { transform: scale(1.03); }
+    .img-caption {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      padding: 6px 10px;
+      font-size: 11px;
+      color: #7a8aaa;
+      background: linear-gradient(transparent, rgba(8,11,20,0.85));
+      letter-spacing: 0.5px;
+    }
+
+    /* ── TAGS ── */
+    .tags { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 4px; }
+    .tag {
+      font-size: 11px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      border: 1px solid;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+    }
+
+    /* ── CALLOUT ── */
+    .callout {
+      border-left: 3px solid;
+      padding: 14px 18px;
+      border-radius: 0 8px 8px 0;
+      background: rgba(255,255,255,0.03);
+      margin: 20px 0;
+      font-size: 14.5px;
+      color: #c0cce0;
+    }
+
+    /* ── DIVIDER ── */
+    .divider {
+      width: 100%;
+      height: 1px;
+      background: linear-gradient(to right, transparent, rgba(255,255,255,0.08), transparent);
+      margin: 80px 0;
+    }
+
+    /* ── CONCLUSION ── */
+    .conclusion {
+      text-align: center;
+      padding: 50px 20px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+    .conclusion h2 {
+      font-family: 'Cinzel', serif;
+      font-size: 22px;
+      color: #ffffff;
+      margin-bottom: 16px;
+    }
+    .conclusion p {
+      max-width: 640px;
+      margin: 0 auto;
+      color: #7a8aaa;
+      font-size: 14.5px;
+    }
+
+    @media (max-width: 600px) {
+      .img-row, .img-row.triple { grid-template-columns: 1fr; }
+      .films-row { flex-direction: column; align-items: center; }
+      .poster-img { height: 90px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════
+     COVER
+══════════════════════════════════════════════════ -->
+<section class="cover">
+  <p class="cover-label">Assignment 1 &nbsp;·&nbsp; Game World Design</p>
+  <h1>Game World Design Analysis</h1>
+  <p class="cover-sub">A breakdown of three animated film universes</p>
+  <div class="films-row">
+    <span class="film-badge badge-titan">Titan A.E. &nbsp;(2000)</span>
+    <span class="film-badge badge-treasure">Treasure Planet &nbsp;(2002)</span>
+    <span class="film-badge badge-atlantis">Atlantis: The Lost Empire &nbsp;(2001)</span>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════
+     CONTENT
+══════════════════════════════════════════════════ -->
+<div class="wrapper">
+
+  <!-- ─────────────────────────────────────────────
+       FILM 1: TITAN A.E.
+  ───────────────────────────────────────────── -->
+  <section class="film-section titan">
+    <div class="film-header">
+      <span class="film-number">01</span>
+      <div class="film-title-block">
+        <h2>Titan A.E.</h2>
+        <p class="film-year">2000 &nbsp;·&nbsp; Don Bluth &amp; Gary Goldman &nbsp;·&nbsp; 20th Century Fox</p>
+      </div>
+      <img class="poster-img" src="https://upload.wikimedia.org/wikipedia/en/7/75/Titan_AE_One_Sheet.jpg" alt="Titan A.E. Poster" />
+    </div>
+
+    <img class="hero-img"
+      src="https://image.tmdb.org/t/p/w1280/i6jiRmxfufUQnKYUaurZkqLJ1gU.jpg"
+      alt="Titan A.E. — scene" />
+
+    <h3>1. World Overview</h3>
+    <ul>
+      <li><strong>Time Period & Setting:</strong> The movie is set in the year 3028. Earth has already been destroyed before the story even begins — blown up by a powerful alien race called the Drej.</li>
+      <li><strong>What the World is About:</strong> Humanity is now homeless. Humans are scattered all over the galaxy, living on rundown space stations and working low jobs just to survive. The whole world is built around that feeling of loss.</li>
+      <li><strong>Central Theme:</strong> Can a species rebuild itself after losing everything? That's really what the story and the world are both trying to answer.</li>
+    </ul>
+
+    <div class="callout">
+      The opening scene hits you immediately — Earth just gets wiped out. No buildup, no warning. That sets the tone for the entire world you're about to explore.
+    </div>
+
+    <h3>2. Environmental Design</h3>
+
+    <div class="img-row">
+      <div class="img-wrap">
+        <img src="https://image.tmdb.org/t/p/w1280/yep5VeMgqMloIKahpFUcSv4snNk.jpg" alt="Space station" />
+        <span class="img-caption">Tau-14 Salvage Station — where humans scrape by</span>
+      </div>
+      <div class="img-wrap">
+        <img src="https://image.tmdb.org/t/p/w1280/hlmWf1CucD3ntfWq3sU0qX9gaMw.jpg" alt="Alien world" />
+        <span class="img-caption">Alien world — colorful and alive, unlike human spaces</span>
+      </div>
+    </div>
+
+    <ul>
+      <li><strong>Human Stations:</strong> These places look terrible on purpose — dark, cramped, rusty metal everywhere. You can tell immediately that humans are at the bottom of this universe's social ladder.</li>
+      <li><strong>Alien Worlds:</strong> Every alien planet feels completely different and full of life. One has glowing forests, another has massive ice crystal formations floating in space. The contrast with the human areas is very deliberate.</li>
+      <li><strong>Colors Tell the Story:</strong> Human areas are grey and dim. Alien worlds are bright and vibrant. It's a visual way of showing how low humanity has fallen compared to everyone else.</li>
+      <li><strong>Scale:</strong> The movie constantly reminds you how small humans are — tiny ships drifting through enormous nebulae, dwarfed by everything around them.</li>
+    </ul>
+
+    <div class="img-row">
+      <div class="img-wrap">
+        <img src="https://image.tmdb.org/t/p/w1280/pniACHS8KDVCldB3BlwL78RIZ7V.jpg" alt="Ice rings" />
+        <span class="img-caption">Ice Rings of Tigrin — one of the best-looking sequences in the movie</span>
+      </div>
+      <div class="img-wrap">
+        <img src="https://image.tmdb.org/t/p/w1280/lxUdD7cnIDSOtc5UsCQeFBuz2Du.jpg" alt="The Titan" />
+        <span class="img-caption">The Titan — the ship that can create a whole new planet</span>
+      </div>
+    </div>
+
+    <h3>3. World Rules &amp; Logic</h3>
+    <ul>
+      <li>The world sticks to proper science fiction rules. Ships, weapons, and travel all work the way you'd expect in a space setting — nothing feels random.</li>
+      <li>The Drej are made purely of energy, which means you can't just shoot them with regular weapons. The movie actually sticks to this rule throughout instead of ignoring it when it's inconvenient.</li>
+      <li>The Titan ship can create a new planet, but only under very specific conditions. It can't just do it anywhere — that limitation is what makes the finale feel earned rather than cheap.</li>
+    </ul>
+
+    <h3>4. Culture &amp; Inhabitants</h3>
+    <div class="tags">
+      <span class="tag">Humans (Diaspora)</span>
+      <span class="tag">The Drej</span>
+      <span class="tag">Akrennians</span>
+      <span class="tag">Gaoul</span>
+    </div>
+    <ul>
+      <li>Humans are treated like second-class citizens everywhere they go. Other species look down on them, give them the worst jobs, and generally don't take them seriously.</li>
+      <li>The Drej work as a hive mind — no individual thoughts, just one collective goal: destroy anything they see as a threat. They're terrifying because they can't be reasoned with.</li>
+      <li>Other alien species in the movie each have their own clear personality and culture — the Gaoul, for example, are wise and nature-connected, which makes them feel like a real society rather than just background characters.</li>
+    </ul>
+
+    <h3>5. Narrative Integration</h3>
+    <ul>
+      <li>The destroyed Earth isn't just backstory — it's the reason every single thing in the movie happens. You feel its absence in every scene.</li>
+      <li>The messy, graffiti-covered human ships do a better job of explaining humanity's situation than any line of dialogue could. You understand their life just by looking at the environment.</li>
+      <li>The main character Cale has the location of the Titan encoded in his hand — which is a neat way of saying that humans carry their own solution inside them, they just need to find it.</li>
+    </ul>
+
+    <h3>6. Unique Design Elements</h3>
+    <ul>
+      <li>The Drej being made entirely of glowing blue energy is genuinely unlike any alien villain you'd seen in animation at the time. Their ship designs are all sharp angles and crystal shapes — nothing organic or mechanical about them.</li>
+      <li>The ice ring chase sequence is probably the most visually creative thing in the movie. Giant floating crystals used as a hide-and-seek battlefield is a concept that sticks with you.</li>
+      <li>The ending — watching a whole new planet form — lands so well because the movie was honest about how the technology worked from the very beginning.</li>
+    </ul>
+
+    <h3>7. Game Design Perspective</h3>
+    <ul>
+      <li><strong>Best Fit:</strong> A space exploration RPG or action-adventure game would work really well with this world.</li>
+      <li>You'd play as a human pilot navigating the galaxy, visiting alien worlds, forming alliances, and trying to avoid the Drej — who can't be fought head-on, so you'd need creative solutions instead.</li>
+      <li>The social system (humans being outsiders) could drive the entire progression — earning respect from alien civilizations unlocks new areas, technology, and story paths.</li>
+      <li>A long-term goal of rebuilding a home for humanity would give the game real emotional weight and direction throughout.</li>
+    </ul>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ─────────────────────────────────────────────
+       FILM 2: TREASURE PLANET
+  ───────────────────────────────────────────── -->
+  <section class="film-section treasure">
+    <div class="film-header">
+      <span class="film-number">02</span>
+      <div class="film-title-block">
+        <h2>Treasure Planet</h2>
+        <p class="film-year">2002 &nbsp;·&nbsp; Ron Clements &amp; John Musker &nbsp;·&nbsp; Walt Disney Feature Animation</p>
+      </div>
+      <img class="poster-img" src="https://upload.wikimedia.org/wikipedia/en/7/7e/Treasure_Planet_poster.jpg" alt="Treasure Planet Poster" />
+    </div>
+
+    <img class="hero-img"
+      src="https://image.tmdb.org/t/p/w1280/f2opsSUSiMdEp6AiY2sbC8QPd8S.jpg"
+      alt="Treasure Planet — scene" />
+
+    <h3>1. World Overview</h3>
+    <ul>
+      <li><strong>Time Period & Setting:</strong> This movie takes the classic Treasure Island story and moves it to space. The twist is that the world still looks like the Age of Sail — wooden ships, rope rigging, old-fashioned clothes — but everything happens in outer space.</li>
+      <li><strong>Core Idea:</strong> A rebellious teenager named Jim Hawkins joins a space voyage looking for the legendary Treasure Planet, and ends up discovering more about himself than the treasure.</li>
+      <li><strong>Feel of the World:</strong> It feels like the golden age of pirates and exploration never ended — it just moved to the stars. That one idea shapes everything about how this world looks and functions.</li>
+    </ul>
+
+    <div class="callout">
+      The first time you see a wooden sailing ship fly through a purple nebula, it just works. You buy it completely. That's how well the world commits to its own idea.
+    </div>
+
+    <h3>2. Environmental Design</h3>
+
+    <div class="img-row">
+      <div class="img-wrap">
+        <img src="https://image.tmdb.org/t/p/w1280/30XLt1HzwOsdciWVaYVxlJq3cjH.jpg" alt="Spaceport" />
+        <span class="img-caption">The Spaceport — busy, diverse, full of life</span>
+      </div>
+      <div class="img-wrap">
+        <img src="https://image.tmdb.org/t/p/w1280/ru968wwuVD45oYfBQNuFC7at361.jpg" alt="RLS Legacy in space" />
+        <span class="img-caption">RLS Legacy — a wooden galleon sailing through space</span>
+      </div>
+    </div>
+
+    <ul>
+      <li><strong>Benbow Inn:</strong> Where the story starts — warm, cozy, familiar. It's designed to feel safe so that leaving it feels like a real departure into the unknown.</li>
+      <li><strong>The Spaceport:</strong> The first look at the wider world. Dozens of alien species, huge ships, and a civilization that clearly stretches far beyond what we see. It makes the world feel massive instantly.</li>
+      <li><strong>The RLS Legacy (the Ship):</strong> This is where most of the movie takes place. It's a proper sailing ship — wooden hull, canvas sails — but it flies through space using solar wind. The crew lives, works, and fights on its deck just like an old pirate ship.</li>
+      <li><strong>Treasure Planet:</strong> An ancient mechanical planet built to store treasure, rigged with traps. Its surface is crumbling gold machinery. The idea that the treasure itself is a trap is a great subversion.</li>
+      <li><strong>Color Changes:</strong> Each location has its own color palette. The inn is warm orange and amber. Space is deep purple and blue. Treasure Planet is burning gold. The movie uses color to signal tone at every stage.</li>
+    </ul>
+
+    <div class="img-row">
+      <div class="img-wrap">
+        <img src="https://image.tmdb.org/t/p/w1280/gmb1HHHJunFdGyJq7MTsYr8h0j0.jpg" alt="Space nebula" />
+        <span class="img-caption">Deep space — the ship is tiny compared to what surrounds it</span>
+      </div>
+      <div class="img-wrap">
+        <img src="https://image.tmdb.org/t/p/w1280/mVuH9hNGnxF9bbhlh1Tr9FuG3Uc.jpg" alt="Treasure Planet surface" />
+        <span class="img-caption">Treasure Planet — gold, ancient machinery, and deadly traps</span>
+      </div>
+    </div>
+
+    <h3>3. World Rules &amp; Logic</h3>
+    <ul>
+      <li>The biggest rule is that sailing ships work in space. The movie never questions this or explains it away — it just fully commits to it, and because of that, you accept it without thinking twice.</li>
+      <li>There's a thin atmosphere around each ship that lets people breathe and move on deck. This is shown early and never forgotten later when it would be convenient to ignore it.</li>
+      <li>Technology is a mix of old and new. Star maps are holographic, but navigation is still done by hand. Cyborg parts exist and are totally normal — Long John Silver has a mechanical arm that can turn into almost anything.</li>
+      <li>The Portal on Treasure Planet runs on the gold of the treasure itself as fuel — which fits perfectly with the world's steampunk logic.</li>
+    </ul>
+
+    <h3>4. Culture &amp; Inhabitants</h3>
+    <div class="tags">
+      <span class="tag">Humans</span>
+      <span class="tag">Multi-Species Crew</span>
+      <span class="tag">Space Pirates</span>
+      <span class="tag">Cyborgs</span>
+    </div>
+    <ul>
+      <li>The crew of the Legacy is a mix of all kinds of alien species, which mirrors how real tall-ship crews were made up of people from many different backgrounds.</li>
+      <li>The social structure is a classic maritime hierarchy — captain, first mate, cook, crew — and every species follows it, which makes the alien world feel grounded and believable.</li>
+      <li>Long John Silver is one of the more interesting characters because he's not a straight-up villain. He has a genuine code and a real bond with Jim, which makes the whole story more complicated than just good vs. evil.</li>
+    </ul>
+
+    <h3>5. Narrative Integration</h3>
+    <ul>
+      <li>The wide-open space mirrors Jim's feeling of being trapped and wanting to escape. The world itself reflects where his head is at throughout the story.</li>
+      <li>Silver's cyborg body — half flesh, half machine — visually represents the dual nature of almost every character in the movie. Everyone is torn between two things.</li>
+      <li>There's a robot caretaker called B.E.N. who was left behind on Treasure Planet with his memory wiped. He hints at a much bigger history — someone built this whole mechanical planet, left a servant to guard it, and just disappeared. That's the kind of detail that makes a world feel real.</li>
+    </ul>
+
+    <h3>6. Unique Design Elements</h3>
+    <ul>
+      <li>No other movie has done the sailing-ship-in-space concept this fully or this well. It's a completely original visual idea that holds up the entire movie.</li>
+      <li>Silver's arm — which transforms from a cooking ladle to a cannon to a grappling hook — is one of the most creative character design choices in any Disney movie.</li>
+      <li>The movie had a $140 million budget and blended hand-drawn and CGI animation so smoothly that most viewers can't tell where one ends and the other begins.</li>
+    </ul>
+
+    <h3>7. Game Design Perspective</h3>
+    <ul>
+      <li><strong>Best Fit:</strong> An open-world pirate adventure game — basically Sea of Thieves but in space with solar galleons instead of regular ships.</li>
+      <li>Players would captain their own ship, hire alien crew members with different abilities, and travel through star systems hunting treasure maps.</li>
+      <li>Ship combat using solar cannons, boarding enemy ships, and managing your crew would form the main gameplay loop.</li>
+      <li>A reputation system — are you a pirate or do you follow the law — would decide which ports let you in, what missions you get, and who trusts you.</li>
+      <li>The retro-futuristic look would make the game stand out visually from every other space or pirate game on the market.</li>
+    </ul>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ─────────────────────────────────────────────
+       FILM 3: ATLANTIS: THE LOST EMPIRE
+  ───────────────────────────────────────────── -->
+  <section class="film-section atlantis">
+    <div class="film-header">
+      <span class="film-number">03</span>
+      <div class="film-title-block">
+        <h2>Atlantis: The Lost Empire</h2>
+        <p class="film-year">2001 &nbsp;·&nbsp; Gary Trousdale &amp; Kirk Wise &nbsp;·&nbsp; Walt Disney Feature Animation</p>
+      </div>
+      <img class="poster-img" src="https://upload.wikimedia.org/wikipedia/en/d/de/Atlantis_The_Lost_Empire_poster.jpg" alt="Atlantis Poster" />
+    </div>
+
+    <img class="hero-img"
+      src="https://image.tmdb.org/t/p/w1280/4eTiLRTYwAVQyQAjuFuf3BXAony.jpg"
+      alt="Atlantis — scene" />
+
+    <h3>1. World Overview</h3>
+    <ul>
+      <li><strong>Time Period & Setting:</strong> The movie starts in 1914 — the Edwardian era — in Washington D.C., and then takes you thousands of feet underground into a hidden volcanic cavern where the ancient city of Atlantis has been living in isolation for thousands of years.</li>
+      <li><strong>Core Idea:</strong> A young linguist named Milo Thatch joins a secret expedition to find Atlantis. What they find is a real, living civilization — not just ruins. And then the expedition has to decide what to do about that.</li>
+      <li><strong>What the World Asks:</strong> When you discover something ancient and powerful, do you have the right to take it? That moral question is baked into the world itself.</li>
+    </ul>
+
+    <div class="callout">
+      The moment the team first sees Atlantis — this enormous glowing city carved into a cavern wall — is genuinely breathtaking. The scale of it hits you all at once.
+    </div>
+
+    <h3>2. Environmental Design</h3>
+
+    <div class="img-row">
+      <div class="img-wrap">
+        <img src="https://image.tmdb.org/t/p/w1280/fYr0fqT9NImOuaN1QgnDHgGh4Ci.jpg" alt="Underground journey" />
+        <span class="img-caption">The path to Atlantis — dangerous and beautiful</span>
+      </div>
+      <div class="img-wrap">
+        <img src="https://image.tmdb.org/t/p/w1280/y7XlMkbp8lV078iuXcnrY6fBjQo.jpg" alt="Atlantis city" />
+        <span class="img-caption">First sight of Atlantis — carved into a volcanic cavern</span>
+      </div>
+    </div>
+
+    <ul>
+      <li><strong>Washington D.C. Opening:</strong> The movie starts in a dusty museum, gas-lit corridors, and Victorian-era architecture. It grounds you in the real world before pulling you into the fantasy.</li>
+      <li><strong>The Ulysses Submarine:</strong> This massive steam-powered submarine bridges the two worlds — old industrial technology meeting something ancient. Its dark iron design makes it feel like a weapon pointed at something fragile.</li>
+      <li><strong>The Underground Tunnels:</strong> To get to Atlantis, the team passes through ancient stone corridors full of traps and giant mechanical guardians. It feels like the city is already warning them to turn back.</li>
+      <li><strong>The City of Atlantis:</strong> Built into the walls of a cavern and lit by the warm glow of the crystal, the city's architecture blends ancient Greek, Mesoamerican, and Art Nouveau styles. Nothing about it looks like any single real-world culture — it feels genuinely alien but also ancient.</li>
+      <li><strong>Color Shift:</strong> The surface world is all muted greys and beige tones. The moment you enter Atlantis, everything becomes warm amber, deep teal, and crystal blue. That color shift alone tells you you've entered somewhere special.</li>
+      <li><strong>Scale as Storytelling:</strong> The streets and buildings are built for a city of tens of thousands. Only a few hundred people still live there. That emptiness communicates everything about Atlantis without a single word of explanation.</li>
+    </ul>
+
+    <div class="img-row triple">
+      <div class="img-wrap">
+        <img src="https://image.tmdb.org/t/p/w1280/pSsxltbhfk5q9Lgo5aJqzSSuANW.jpg" alt="Atlantis architecture" />
+        <span class="img-caption">Ancient architecture — built for a much larger population</span>
+      </div>
+      <div class="img-wrap">
+        <img src="https://image.tmdb.org/t/p/w1280/aTfIqpRA9raWdUVWAzyTPz2Q3kf.jpg" alt="The crystal" />
+        <span class="img-caption">The Heart of Atlantis — the crystal that powers everything</span>
+      </div>
+      <div class="img-wrap">
+        <img src="https://image.tmdb.org/t/p/w1280/oCwFnkRIsgSuNpUGLtLevONled0.jpg" alt="Atlantean people" />
+        <span class="img-caption">The Atlanteans — alive, but slowly forgetting their own history</span>
+      </div>
+    </div>
+
+    <h3>3. World Rules &amp; Logic</h3>
+    <ul>
+      <li>Atlantis runs on a crystal energy system. The Heart of Atlantis is a large central crystal that powers the city's light, technology, vehicles, and even the health of the people — they each have a small crystal shard that connects them to it.</li>
+      <li>What's interesting is that the crystal's rules never change throughout the movie. It heals, it powers things, it creates barriers — and it always works the same way. The film doesn't suddenly give it new powers just to solve a problem.</li>
+      <li>The Atlanteans have forgotten how most of their technology works. Their machines still function, but nobody can explain why anymore. That's a clever detail — an advanced civilization that has lost the knowledge to understand itself.</li>
+    </ul>
+
+    <h3>4. Culture &amp; Inhabitants</h3>
+    <div class="tags">
+      <span class="tag">Atlanteans</span>
+      <span class="tag">Surface-World Expedition</span>
+      <span class="tag">Royal Bloodline</span>
+    </div>
+    <ul>
+      <li>The Atlanteans still perform rituals and ceremonies from thousands of years ago, but most of them have no idea what the original meaning was. It's a small detail that makes the civilization feel genuinely ancient and worn down.</li>
+      <li>Their language is the root of all human languages, which is why Milo (the linguist) can communicate with them. It's a satisfying piece of worldbuilding that actually makes sense.</li>
+      <li>Princess Kida is interesting because she's been alive for thousands of years but still doesn't fully understand her own people's history. She's the bridge between the past and the present.</li>
+      <li>The expedition team from the surface represents different motivations — curiosity, greed, loyalty, duty. The movie doesn't pretend they're all heroes, which makes the conflict more interesting.</li>
+    </ul>
+
+    <h3>5. Narrative Integration</h3>
+    <ul>
+      <li>The city itself is what's at stake in the story. It's not just a location — it's a living thing connected to the people. When the crystal is threatened, the Atlanteans weaken. The world and its characters are literally linked.</li>
+      <li>The empty, oversized buildings and streets are doing constant background storytelling — showing you a civilization in slow decline without ever needing to announce it.</li>
+      <li>The villain's plan to sell the crystal on the surface market mirrors real colonial history. It gives the conflict a moral layer that makes the story feel more serious than a typical adventure movie.</li>
+    </ul>
+
+    <h3>6. Unique Design Elements</h3>
+    <ul>
+      <li>The Atlantean script and language was fully designed for the movie — it's a working constructed language, not just decorative symbols. That level of detail is rare in animation.</li>
+      <li>The art direction was developed with comic artist Mike Mignola (creator of Hellboy), which gives the movie a bold, angular look that's completely different from any other Disney film before or after.</li>
+      <li>The Leviathan — the giant mechanical lobster that guards the entrance to Atlantis — is one of the most memorable creature designs in any animated movie. It's terrifying, ancient-looking, and mechanical all at once.</li>
+      <li>The concept of a civilization that has forgotten its own greatness is one that stays with you. It's a more thoughtful idea than most adventure movies bother with.</li>
+    </ul>
+
+    <h3>7. Game Design Perspective</h3>
+    <ul>
+      <li><strong>Best Fit:</strong> An action-adventure or metroidvania game — exploring a massive ruined city and slowly unlocking its secrets piece by piece.</li>
+      <li>Players would explore Atlantis, recovering lost technology that gives them new abilities — crystal-powered vehicles, translation puzzles, ancient weapon systems.</li>
+      <li>The crystal energy system could be a dual-use resource in gameplay — it powers your abilities but also keeps the city alive. Use too much and the city starts to suffer.</li>
+      <li>The expedition team structure is perfect for co-op play — each character has a unique skill that others depend on, so teamwork would be built into the core design.</li>
+      <li>The surface world's military threat vs. Atlantis's ancient defenses could create two very different combat styles — modern weapons against ancient technology.</li>
+    </ul>
+  </section>
+
+  <!-- ── CONCLUSION ── -->
+  <div class="conclusion">
+    <h2>Final Thoughts</h2>
+    <p>
+      All three of these movies do something that not many animated films try — they build worlds that feel like they exist beyond the edges of the screen.
+      Titan A.E. uses the absence of a home planet to drive everything. Treasure Planet builds its entire identity around one bold visual idea and never breaks it.
+      Atlantis earns its emotional weight through cultural detail and a villain whose motivation actually makes sense.
+      In all three cases, the world isn't just a backdrop — it's an active part of the story, and that's what makes them worth studying.
+    </p>
+  </div>
+
+</div><!-- /wrapper -->
+</body>
+</html>
